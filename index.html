@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#101216">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" type="image/png" href="./icon-192.png">
+<link rel="apple-touch-icon" href="./icon-192.png">
+<title>Dual-Mode Lab</title>
+<style>
+  :root{
+    --bg:#101216;
+    --card:#171a20;
+    --card2:#1d2129;
+    --line:#282c36;
+    --text:#e8e5de;
+    --muted:#9a968c;
+    --faint:#6b675e;
+    --art:#e9a464;
+    --art-soft:rgba(233,164,100,.14);
+    --phy:#6fb4d8;
+    --phy-soft:rgba(111,180,216,.14);
+    --grey:#8b8f99;
+    --grey-soft:rgba(139,143,153,.14);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  body{
+    background:var(--bg);color:var(--text);font-family:var(--sans);
+    font-size:15px;line-height:1.55;min-height:100vh;
+    background-image:
+      radial-gradient(700px 340px at -8% -10%, rgba(233,164,100,.07), transparent 60%),
+      radial-gradient(700px 340px at 108% -10%, rgba(111,180,216,.07), transparent 60%);
+    background-attachment:fixed;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .wrap{max-width:620px;margin:0 auto;padding:26px 16px 60px}
+
+  header{margin-bottom:22px}
+  .wordmark{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .wm-art{font-family:var(--serif);font-style:italic;font-weight:600;font-size:34px;color:var(--art)}
+  .wm-slash{font-size:25px;color:var(--faint);font-weight:200}
+  .wm-phy{font-family:var(--mono);font-weight:600;font-size:27px;letter-spacing:3px;color:var(--phy)}
+  .sub{margin-top:5px;color:var(--muted);font-size:13.5px}
+  .sub b{color:var(--text)}
+  .axis{height:2px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--art),var(--phy))}
+  #storageBanner{display:none;margin-top:12px;padding:9px 13px;border:1px solid #5a4020;background:rgba(233,164,100,.08);border-radius:8px;font-size:13px;color:var(--muted)}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
+  .card h2{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:13px;font-family:var(--mono)}
+
+  /* ---------- check-in ---------- */
+  .q{font-size:16px;margin-bottom:13px}
+  .bigrow{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:480px){.bigrow{grid-template-columns:1fr 1fr 1fr}}
+  .bigbtn{
+    border:1px solid var(--line);background:var(--card2);color:var(--muted);
+    padding:18px 10px;border-radius:12px;cursor:pointer;text-align:center;transition:all .15s ease;
+    min-height:76px;
+  }
+  .bigbtn .n{display:block;font-size:21px;margin-bottom:3px}
+  .bigbtn .d{display:block;font-size:11px;letter-spacing:.3px}
+  .bigbtn.art .n{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--art)}
+  .bigbtn.phy .n{font-family:var(--mono);letter-spacing:2px;font-weight:600;font-size:17px;color:var(--phy);padding-top:4px}
+  .bigbtn.grey .n{color:var(--grey);font-weight:600;font-size:18px;padding-top:3px}
+  .bigbtn.art:active{border-color:var(--art);background:var(--art-soft)}
+  .bigbtn.phy:active{border-color:var(--phy);background:var(--phy-soft)}
+  .bigbtn.grey:active{border-color:var(--grey);background:var(--grey-soft)}
+  .bigbtn:active{transform:scale(.97)}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--muted);outline-offset:1px}
+
+  #phyFollow{display:none;margin-top:12px}
+  #phyFollow .q{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .halfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .halfbtn{border:1px solid var(--line);background:var(--card2);color:var(--text);padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13.5px;transition:all .15s;min-height:56px}
+  .halfbtn:active{border-color:var(--phy);background:var(--phy-soft);color:var(--phy)}
+  .halfbtn.idle:active{border-color:#d9a080;background:rgba(217,160,128,.1);color:#d9a080}
+
+  .ctxrow{display:flex;gap:8px;margin-top:14px;align-items:center}
+  .ctxlabel{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-family:var(--mono)}
+  .ctxchip{border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;padding:6px 15px;border-radius:999px;cursor:pointer;min-height:34px}
+  .ctxchip.on{border-color:var(--muted);color:var(--text);background:var(--card2)}
+  .savedmsg{font-size:13px;color:var(--muted);margin-top:12px;min-height:18px;text-align:center}
+
+  /* ---------- today strip ---------- */
+  .strip{display:flex;flex-wrap:wrap;gap:6px;min-height:14px}
+  .dot{width:14px;height:14px;border-radius:50%}
+  .dot.art{background:var(--art)} .dot.phy{background:var(--phy)}
+  .dot.phyidle{background:transparent;border:2px solid var(--phy)}
+  .dot.grey{background:var(--grey)}
+  .stripempty{color:var(--faint);font-size:13px}
+
+  /* ---------- stats ---------- */
+  .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  @media(min-width:480px){.statgrid{grid-template-columns:repeat(4,1fr)}}
+  .stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
+  .stat .k{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);margin-bottom:5px}
+  .stat .v{font-family:var(--mono);font-size:23px;font-weight:600;line-height:1.1}
+  .stat .d{font-size:11px;color:var(--muted);margin-top:3px}
+  .v.artc{color:var(--art)} .v.greyc{color:var(--grey)} .v.warn{color:#d9a080}
+
+  /* ---------- trend ---------- */
+  .trend{display:flex;gap:4px;align-items:flex-end;height:92px}
+  .tcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%}
+  .tseg{border-radius:2px;transition:height .4s ease}
+  .tseg.a{background:var(--art)} .tseg.p{background:var(--phy)} .tseg.g{background:#3a3e48}
+  .tlabels{display:flex;gap:4px;margin-top:5px}
+  .tlabels span{flex:1;text-align:center;font-size:8.5px;color:var(--faint);font-family:var(--mono)}
+  .legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+  .footnote{font-size:11.5px;color:var(--faint);margin-top:10px}
+
+  /* ---------- log ---------- */
+  .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
+  .row:last-child{border-bottom:none}
+  .row .t{font-family:var(--mono);color:var(--faint);font-size:12px;min-width:80px}
+  .row .s{flex:1}
+  .s.sa{color:var(--art)} .s.sp{color:var(--phy)} .s.sg{color:var(--grey)}
+  .row .c{font-size:11px;color:var(--faint);font-family:var(--mono)}
+  .row .del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:17px;padding:4px 10px;border-radius:5px}
+  .row .del:active{color:#d98080}
+  .empty{color:var(--faint);font-size:13px;padding:6px 0}
+  .toolbar{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
+  .toolbtn{border:1px solid var(--line);background:var(--card2);color:var(--muted);padding:9px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;min-height:38px}
+  .toolbtn:active{color:var(--text);border-color:var(--muted)}
+  .toolbtn.danger:active{color:#d98080;border-color:#d98080}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="wordmark">
+      <span class="wm-art">Art</span><span class="wm-slash">/</span><span class="wm-phy">PHYSICS</span>
+    </div>
+    <p class="sub">One tap, whenever you remember: <b>what state was I just in?</b> The check itself is the presence bell.</p>
+    <div class="axis" aria-hidden="true"></div>
+    <div id="storageBanner">This browser is blocking local storage — data will not persist. Check Chrome site settings.</div>
+  </header>
+
+  <!-- ================= CHECK-IN ================= -->
+  <section class="card">
+    <div class="q">What state was I just in?</div>
+    <div class="bigrow" id="mainBtns">
+      <button type="button" class="bigbtn art" onclick="tap('art')">
+        <span class="n">Art</span><span class="d">present · immersed · ambient awareness</span>
+      </button>
+      <button type="button" class="bigbtn phy" onclick="tap('phy')">
+        <span class="n">PHYSICS</span><span class="d">analytical engine engaged</span>
+      </button>
+      <button type="button" class="bigbtn grey" onclick="tap('grey')">
+        <span class="n">Grey</span><span class="d">drift · rumination · vigilance</span>
+      </button>
+    </div>
+
+    <div id="phyFollow">
+      <div class="q">Was Physics actually required?</div>
+      <div class="halfrow">
+        <button type="button" class="halfbtn" onclick="tapPhy(true)">Required — real problem, real output</button>
+        <button type="button" class="halfbtn idle" onclick="tapPhy(false)">Idle — engine running, nothing to solve</button>
+      </div>
+    </div>
+
+    <div class="ctxrow">
+      <span class="ctxlabel">Context</span>
+      <button type="button" class="ctxchip" id="ctxWork" onclick="setCtx('work')">Work</button>
+      <button type="button" class="ctxchip" id="ctxOff" onclick="setCtx('off')">Off</button>
+    </div>
+    <div class="savedmsg" id="savedMsg"></div>
+  </section>
+
+  <!-- ================= TODAY ================= -->
+  <section class="card">
+    <h2>Today</h2>
+    <div class="strip" id="todayStrip"><span class="stripempty">No checks yet today.</span></div>
+  </section>
+
+  <!-- ================= READOUT ================= -->
+  <section class="card">
+    <h2>Last 14 days</h2>
+    <div class="statgrid">
+      <div class="stat"><div class="k">Art rate</div><div class="v artc" id="stArt">–</div><div class="d" id="stArtD">of all checks</div></div>
+      <div class="stat"><div class="k">Grey rate</div><div class="v greyc" id="stGrey">–</div><div class="d">the enemy → 0%</div></div>
+      <div class="stat"><div class="k">Idle physics</div><div class="v warn" id="stIdle">–</div><div class="d">of Physics checks</div></div>
+      <div class="stat"><div class="k">Work-hours art</div><div class="v artc" id="stWorkArt">–</div><div class="d">the new frontier</div></div>
+    </div>
+
+    <div style="margin-top:18px">
+      <div class="trend" id="trend"></div>
+      <div class="tlabels" id="tlabels"></div>
+      <div class="legend">
+        <span><i style="background:var(--art)"></i>Art</span>
+        <span><i style="background:var(--phy)"></i>Physics</span>
+        <span><i style="background:#3a3e48"></i>Grey</span>
+      </div>
+      <p class="footnote">Each bar = that day's checks, stacked by share. Default-Art is winning when amber dominates and grey thins toward nothing — Physics is fine, it's the tool.</p>
+    </div>
+  </section>
+
+  <!-- ================= LOG ================= -->
+  <section class="card">
+    <h2>Recent checks</h2>
+    <div id="logList"><div class="empty">Nothing logged yet.</div></div>
+    <div class="toolbar">
+      <button class="toolbtn" onclick="exportJSON()">Export</button>
+      <button class="toolbtn" onclick="document.getElementById('importFile').click()">Import</button>
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
+      <button class="toolbtn danger" onclick="resetAll()">Reset</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+const KEY = 'dualmode-checks-v2';
+let checks = [];
+let ctx = null;            // 'work' | 'off'
+let ctxManual = false;
+
+/* ---------- storage (localStorage for standalone PWA) ---------- */
+function loadData(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    checks = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    checks = [];
+    showBanner();
+  }
+  render();
+}
+function persist(){
+  try{
+    localStorage.setItem(KEY, JSON.stringify(checks));
+  }catch(e){
+    showBanner();
+  }
+}
+function showBanner(){ document.getElementById('storageBanner').style.display='block'; }
+
+/* ---------- context ---------- */
+function autoCtx(){
+  const d = new Date();
+  const wd = d.getDay() >= 1 && d.getDay() <= 5;
+  const h = d.getHours() + d.getMinutes()/60;
+  return (wd && h >= 9 && h < 18.5) ? 'work' : 'off';
+}
+function setCtx(v){ ctx = v; ctxManual = true; paintCtx(); }
+function paintCtx(){
+  document.getElementById('ctxWork').classList.toggle('on', ctx==='work');
+  document.getElementById('ctxOff').classList.toggle('on', ctx==='off');
+}
+function refreshCtx(){ if (!ctxManual){ ctx = autoCtx(); paintCtx(); } }
+
+/* ---------- tapping ---------- */
+function tap(state){
+  if (state === 'phy'){
+    document.getElementById('phyFollow').style.display = 'block';
+    return;
+  }
+  save(state, null);
+}
+function tapPhy(needed){
+  document.getElementById('phyFollow').style.display = 'none';
+  save('phy', needed);
+}
+function save(state, phyNeeded){
+  checks.push({
+    id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2)),
+    ts: Date.now(),
+    state,
+    phyNeeded,
+    ctx
+  });
+  persist();
+  const msgs = {
+    art: 'Logged. Stay with it.',
+    phy: phyNeeded ? 'Logged — clean tool use.' : 'Logged — idle engine noticed. That noticing is the work.',
+    grey: 'Logged. Grey seen is grey already dissolving — come back to one sensation.'
+  };
+  flash(msgs[state]);
+  if (navigator.vibrate) navigator.vibrate(15);
+  ctxManual = false; refreshCtx();
+  render();
+}
+function flash(t){
+  const el = document.getElementById('savedMsg');
+  el.textContent = t;
+  setTimeout(()=>{ if (el.textContent===t) el.textContent=''; }, 3200);
+}
+
+/* ---------- helpers ---------- */
+function dayKey(ts){
+  const d = new Date(ts);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function pct(n, d){ return d ? Math.round(100*n/d)+'%' : '–'; }
+
+/* ---------- render ---------- */
+function render(){ renderToday(); renderStats(); renderTrend(); renderLog(); }
+
+function renderToday(){
+  const box = document.getElementById('todayStrip');
+  const tk = dayKey(Date.now());
+  const today = checks.filter(c => dayKey(c.ts) === tk);
+  if (!today.length){ box.innerHTML = '<span class="stripempty">No checks yet today.</span>'; return; }
+  box.innerHTML = today.map(c=>{
+    const cls = c.state==='art' ? 'art' : c.state==='grey' ? 'grey' : (c.phyNeeded===false ? 'phyidle' : 'phy');
+    const d = new Date(c.ts);
+    const t = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const name = c.state==='art' ? 'Art' : c.state==='grey' ? 'Grey' : (c.phyNeeded===false ? 'Physics (idle)' : 'Physics');
+    return '<span class="dot '+cls+'" title="'+t+' · '+name+'"></span>';
+  }).join('');
+}
+
+function renderStats(){
+  const cutoff = Date.now() - 14*86400000;
+  const r = checks.filter(c=>c.ts >= cutoff);
+  const art = r.filter(c=>c.state==='art').length;
+  const grey = r.filter(c=>c.state==='grey').length;
+  const phy = r.filter(c=>c.state==='phy');
+  const idle = phy.filter(c=>c.phyNeeded===false).length;
+  const work = r.filter(c=>c.ctx==='work');
+  const workArt = work.filter(c=>c.state==='art').length;
+
+  document.getElementById('stArt').textContent = pct(art, r.length);
+  document.getElementById('stArtD').textContent = r.length + ' checks';
+  document.getElementById('stGrey').textContent = pct(grey, r.length);
+  document.getElementById('stIdle').textContent = pct(idle, phy.length);
+  document.getElementById('stWorkArt').textContent = pct(workArt, work.length);
+}
+
+function renderTrend(){
+  const trend = document.getElementById('trend');
+  const labels = document.getElementById('tlabels');
+  trend.innerHTML = ''; labels.innerHTML = '';
+  const days = [];
+  for (let i=13;i>=0;i--){
+    const d = new Date(Date.now() - i*86400000);
+    days.push({ key: dayKey(d.getTime()), label: String(d.getDate()), a:0, p:0, g:0 });
+  }
+  const map = Object.fromEntries(days.map(d=>[d.key,d]));
+  checks.forEach(c=>{
+    const k = dayKey(c.ts);
+    if (!map[k]) return;
+    if (c.state==='art') map[k].a++;
+    else if (c.state==='phy') map[k].p++;
+    else map[k].g++;
+  });
+  days.forEach(d=>{
+    const tot = d.a + d.p + d.g;
+    const col = document.createElement('div');
+    col.className = 'tcol';
+    col.title = tot ? ('Art '+d.a+' · Physics '+d.p+' · Grey '+d.g) : 'no checks';
+    if (tot){
+      const mk = (cls, n)=>{ const s=document.createElement('div'); s.className='tseg '+cls; s.style.height=(100*n/tot)+'%'; return s; };
+      if (d.g) col.appendChild(mk('g', d.g));
+      if (d.p) col.appendChild(mk('p', d.p));
+      if (d.a) col.appendChild(mk('a', d.a));  // art at the base
+    }
+    trend.appendChild(col);
+    const lb = document.createElement('span'); lb.textContent = d.label; labels.appendChild(lb);
+  });
+}
+
+function renderLog(){
+  const box = document.getElementById('logList');
+  if (!checks.length){ box.innerHTML = '<div class="empty">Nothing logged yet.</div>'; return; }
+  const rows = [...checks].sort((a,b)=>b.ts-a.ts).slice(0,30);
+  box.innerHTML = rows.map(c=>{
+    const d = new Date(c.ts);
+    const when = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const name = c.state==='art' ? 'Art' : c.state==='grey' ? 'Grey' : ('Physics'+(c.phyNeeded===false?' — idle':c.phyNeeded===true?' — required':''));
+    const cls = c.state==='art' ? 'sa' : c.state==='grey' ? 'sg' : 'sp';
+    return '<div class="row">'
+      + '<span class="t">'+when+'</span>'
+      + '<span class="s '+cls+'">'+name+'</span>'
+      + '<span class="c">'+(c.ctx||'')+'</span>'
+      + '<button class="del" title="Delete" onclick="delCheck(\''+c.id+'\')">×</button>'
+      + '</div>';
+  }).join('');
+}
+
+function delCheck(id){
+  checks = checks.filter(c=>c.id!==id);
+  persist();
+  render();
+}
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(checks, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'dual-mode-checks.json';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function importJSON(input){
+  const file = input.files && input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data)) throw new Error('not an array');
+      const existing = new Set(checks.map(c=>c.id));
+      let added = 0;
+      data.forEach(c=>{
+        if (c && c.id && c.ts && c.state && !existing.has(c.id)){ checks.push(c); added++; }
+      });
+      checks.sort((a,b)=>a.ts-b.ts);
+      persist();
+      render();
+      flash('Imported '+added+' checks.');
+    }catch(e){
+      flash('Import failed — file is not a valid export.');
+    }
+    input.value = '';
+  };
+  reader.readAsText(file);
+}
+function resetAll(){
+  if (!confirm('Delete all checks? Export first if you want the data.')) return;
+  checks = [];
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  render();
+}
+
+/* ---------- init ---------- */
+refreshCtx();
+setInterval(refreshCtx, 60000);
+loadData();
+
+/* ---------- PWA service worker ---------- */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('./sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
