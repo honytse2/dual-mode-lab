@@ -90,6 +90,31 @@
   .ctxchip.on{border-color:var(--muted);color:var(--text);background:var(--card2)}
   .savedmsg{font-size:13px;color:var(--muted);margin-top:12px;min-height:18px;text-align:center}
 
+  /* ---------- modes guide ---------- */
+  .mode{border:1px solid var(--line);border-left-width:3px;border-radius:10px;background:var(--card2);margin-bottom:10px}
+  .mode:last-of-type{margin-bottom:0}
+  .mode.art{border-left-color:var(--art)} .mode.phy{border-left-color:var(--phy)} .mode.grey{border-left-color:var(--grey)}
+  .mode summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:baseline;gap:10px;min-height:48px}
+  .mode summary::-webkit-details-marker{display:none}
+  .mode summary::after{content:"+";margin-left:auto;color:var(--faint);font-family:var(--mono);font-size:16px}
+  .mode[open] summary::after{content:"–"}
+  .mode summary:focus-visible{outline:2px solid var(--muted);outline-offset:1px;border-radius:9px}
+  .mode .mn{font-size:18px;flex-shrink:0}
+  .mode.art .mn{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--art)}
+  .mode.phy .mn{font-family:var(--mono);letter-spacing:2px;font-weight:600;font-size:15px;color:var(--phy)}
+  .mode.grey .mn{font-weight:600;color:var(--grey)}
+  .mode .mt{font-size:12.5px;color:var(--muted)}
+  .mode .body{padding:0 14px 14px;font-size:14px}
+  .mode .body p{margin-bottom:10px}
+  .mode .lbl{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);margin-bottom:5px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .chips span{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .purpose{border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .mode.art .purpose{background:var(--art-soft)} .mode.phy .purpose{background:var(--phy-soft)} .mode.grey .purpose{background:var(--grey-soft)}
+  .motto{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--text);border-left:2px solid var(--phy);padding:2px 0 2px 12px;margin-bottom:10px}
+  .tapnote{font-size:12.5px;color:var(--muted)}
+  .tapnote b{color:var(--text);font-weight:600}
+
   /* ---------- today strip ---------- */
   .strip{display:flex;flex-wrap:wrap;gap:6px;min-height:14px}
   .dot{width:14px;height:14px;border-radius:50%}
@@ -175,6 +200,41 @@
       <button type="button" class="ctxchip" id="ctxOff" onclick="setCtx('off')">Off</button>
     </div>
     <div class="savedmsg" id="savedMsg"></div>
+  </section>
+
+  <!-- ================= MODES GUIDE ================= -->
+  <section class="card">
+    <h2>The modes</h2>
+
+    <details class="mode art">
+      <summary><span class="mn">Art</span><span class="mt">full connection</span></summary>
+      <div class="body">
+        <p>A state of complete, embodied presence and genuine connection. I feel my body fully during movement, absorb sensory experiences, connect with my physical environment, and experience unfiltered emotional resonance with the people and things I love. Rather than intellectually analysing life, I fully experience it.</p>
+        <span class="lbl">Typical triggers</span>
+        <div class="chips"><span>Running</span><span>Physical movement</span><span>Snooker flow</span><span>Time with loved ones</span></div>
+        <div class="purpose"><span class="lbl">Purpose</span>To fully experience life and connect deeply with what I love.</div>
+        <p class="tapnote"><b>Tap Art</b> when you were inside the experience, not narrating it.</p>
+      </div>
+    </details>
+
+    <details class="mode phy">
+      <summary><span class="mn">PHYSICS</span><span class="mt">first-principles reasoning</span></summary>
+      <div class="body">
+        <p>A mindset rooted in reducing reality to its fundamental laws, causal mechanisms, and underlying truths. I strip away artificial societal constructs, corporate politics, authority, and imposed rules to examine what actually holds up under scrutiny. I anchor my reasoning in fundamental principles while remaining willing to update my conclusions when better evidence emerges.</p>
+        <p class="motto">“Rhythm is freedom inside form.”</p>
+        <p>Establish the essential constraints and alignment first, then allow natural rhythm to flow.</p>
+        <div class="purpose"><span class="lbl">Purpose</span>To identify and defend what is fundamentally true, independent of authority or social pressure.</div>
+        <p class="tapnote"><b>Required</b> means there was a real problem with a real output, which is the tool doing its job. <b>Idle</b> means the engine was running with nothing to solve.</p>
+      </div>
+    </details>
+
+    <details class="mode grey">
+      <summary><span class="mn">Grey</span><span class="mt">drift · rumination · vigilance</span></summary>
+      <div class="body">
+        <p>Neither experiencing nor reasoning: attention drifting, replaying, or bracing. Grey is the one mode with no purpose to serve, and the aim is to bring it towards zero.</p>
+        <p class="tapnote"><b>Tap Grey</b> without judgement. Grey seen is grey already dissolving, so come back to one sensation.</p>
+      </div>
+    </details>
   </section>
 
   <!-- ================= TODAY ================= -->
