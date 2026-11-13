@@ -89,6 +89,18 @@
   .ctxchip{border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;padding:6px 15px;border-radius:999px;cursor:pointer;min-height:34px}
   .ctxchip.on{border-color:var(--muted);color:var(--text);background:var(--card2)}
   .savedmsg{font-size:13px;color:var(--muted);margin-top:12px;min-height:18px;text-align:center}
+  .values{margin-top:9px;font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+  .values b{font-weight:600;color:var(--art)}
+  .since{font-size:12px;color:var(--faint);font-family:var(--mono);margin:-6px 0 13px}
+  .since.stale{color:#d9a080}
+
+  /* ---------- art → which value ---------- */
+  #artFollow{display:none;margin-top:12px}
+  #artFollow .q{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .triorow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .valbtn{border:1px solid var(--line);background:var(--card2);color:var(--text);padding:12px 6px;border-radius:10px;cursor:pointer;font-size:13.5px;min-height:50px}
+  .valbtn:active{border-color:var(--art);background:var(--art-soft);color:var(--art)}
+  .valbtn.skip{color:var(--muted)}
 
   /* ---------- modes guide ---------- */
   .mode{border:1px solid var(--line);border-left-width:3px;border-radius:10px;background:var(--card2);margin-bottom:10px}
@@ -167,6 +179,7 @@
       <span class="wm-art">Art</span><span class="wm-slash">/</span><span class="wm-phy">PHYSICS</span>
     </div>
     <p class="sub">One tap, whenever you remember: <b>what state was I just in?</b> The check itself is the presence bell.</p>
+    <p class="values">Dec 22: <b>do good to the people I love</b> · <b>devote fully to my passions</b></p>
     <div class="axis" aria-hidden="true"></div>
     <div id="storageBanner">This browser is blocking local storage — data will not persist. Check Chrome site settings.</div>
   </header>
@@ -174,6 +187,7 @@
   <!-- ================= CHECK-IN ================= -->
   <section class="card">
     <div class="q">What state was I just in?</div>
+    <div class="since" id="since"></div>
     <div class="bigrow" id="mainBtns">
       <button type="button" class="bigbtn art" onclick="tap('art')">
         <span class="n">Art</span><span class="d">present · immersed · ambient awareness</span>
@@ -191,6 +205,15 @@
       <div class="halfrow">
         <button type="button" class="halfbtn" onclick="tapPhy(true)">Required — real problem, real output</button>
         <button type="button" class="halfbtn idle" onclick="tapPhy(false)">Idle — engine running, nothing to solve</button>
+      </div>
+    </div>
+
+    <div id="artFollow">
+      <div class="q">Which value was alive in it? <span style="color:var(--faint)">(optional)</span></div>
+      <div class="triorow">
+        <button type="button" class="valbtn" onclick="tagArt('love')">Loved ones</button>
+        <button type="button" class="valbtn" onclick="tagArt('passion')">Passion</button>
+        <button type="button" class="valbtn skip" onclick="tagArt(null)">Just present</button>
       </div>
     </div>
 
@@ -252,6 +275,7 @@
       <div class="stat"><div class="k">Idle physics</div><div class="v warn" id="stIdle">–</div><div class="d">of Physics checks</div></div>
       <div class="stat"><div class="k">Work-hours art</div><div class="v artc" id="stWorkArt">–</div><div class="d">the new frontier</div></div>
     </div>
+    <p class="footnote" id="valLine"></p>
 
     <div style="margin-top:18px">
       <div class="trend" id="trend"></div>
@@ -320,12 +344,30 @@ function paintCtx(){
 function refreshCtx(){ if (!ctxManual){ ctx = autoCtx(); paintCtx(); } }
 
 /* ---------- tapping ---------- */
+let artTimer = null;
+function hideArtFollow(){ clearTimeout(artTimer); document.getElementById('artFollow').style.display = 'none'; }
 function tap(state){
+  hideArtFollow();
   if (state === 'phy'){
     document.getElementById('phyFollow').style.display = 'block';
     return;
   }
+  document.getElementById('phyFollow').style.display = 'none';
   save(state, null);
+  if (state === 'art'){
+    document.getElementById('artFollow').style.display = 'block';
+    artTimer = setTimeout(hideArtFollow, 12000);   // optional: fades away if ignored
+  }
+}
+/* tag the Art check just saved with the Dec-22 value it served */
+function tagArt(v){
+  hideArtFollow();
+  const last = checks[checks.length-1];
+  if (!last || last.state !== 'art') return;
+  last.val = v;
+  persist();
+  if (v) flash(v === 'love' ? 'Logged — Art with someone you love.' : 'Logged — Art inside your passion.');
+  render();
 }
 function tapPhy(needed){
   document.getElementById('phyFollow').style.display = 'none';
@@ -342,8 +384,8 @@ function save(state, phyNeeded){
   persist();
   const msgs = {
     art: 'Logged. Stay with it.',
-    phy: phyNeeded ? 'Logged — clean tool use.' : 'Logged — idle engine noticed. That noticing is the work.',
-    grey: 'Logged. Grey seen is grey already dissolving — come back to one sensation.'
+    phy: phyNeeded ? 'Logged — clean tool use.' : 'Logged — idle engine noticed. Way back: one small thing for someone you love, or your passion.',
+    grey: 'Logged. Grey seen is grey already dissolving — come back to one sensation, or one small good thing for someone you love.'
   };
   flash(msgs[state]);
   if (navigator.vibrate) navigator.vibrate(15);
@@ -353,7 +395,7 @@ function save(state, phyNeeded){
 function flash(t){
   const el = document.getElementById('savedMsg');
   el.textContent = t;
-  setTimeout(()=>{ if (el.textContent===t) el.textContent=''; }, 3200);
+  setTimeout(()=>{ if (el.textContent===t) el.textContent=''; }, 5000);
 }
 
 /* ---------- helpers ---------- */
@@ -364,7 +406,23 @@ function dayKey(ts){
 function pct(n, d){ return d ? Math.round(100*n/d)+'%' : '–'; }
 
 /* ---------- render ---------- */
-function render(){ renderToday(); renderStats(); renderTrend(); renderLog(); }
+function render(){ renderSince(); renderToday(); renderStats(); renderTrend(); renderLog(); }
+
+/* how long since the last bell — makes the gap visible the moment the app opens */
+function renderSince(){
+  const el = document.getElementById('since');
+  const tk = dayKey(Date.now());
+  const today = checks.filter(c => dayKey(c.ts) === tk).length;
+  if (!checks.length){ el.textContent = 'No checks yet.'; el.classList.remove('stale'); return; }
+  const last = checks.reduce((m,c)=>Math.max(m,c.ts),0);
+  const mins = Math.floor((Date.now()-last)/60000);
+  const ago = mins < 1 ? 'just now'
+            : mins < 60 ? mins+'m ago'
+            : mins < 1440 ? Math.floor(mins/60)+'h '+(mins%60)+'m ago'
+            : Math.floor(mins/1440)+(mins < 2880 ? ' day' : ' days')+' ago';
+  el.textContent = 'Last check '+ago+' · '+today+' today';
+  el.classList.toggle('stale', mins >= 180);
+}
 
 function renderToday(){
   const box = document.getElementById('todayStrip');
@@ -395,6 +453,13 @@ function renderStats(){
   document.getElementById('stGrey').textContent = pct(grey, r.length);
   document.getElementById('stIdle').textContent = pct(idle, phy.length);
   document.getElementById('stWorkArt').textContent = pct(workArt, work.length);
+
+  const artChecks = r.filter(c=>c.state==='art');
+  const love = artChecks.filter(c=>c.val==='love').length;
+  const pas = artChecks.filter(c=>c.val==='passion').length;
+  document.getElementById('valLine').textContent = artChecks.length
+    ? 'Of '+artChecks.length+' Art checks: '+love+' with loved ones · '+pas+' in a passion.'
+    : '';
 }
 
 function renderTrend(){
@@ -437,7 +502,7 @@ function renderLog(){
   box.innerHTML = rows.map(c=>{
     const d = new Date(c.ts);
     const when = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
-    const name = c.state==='art' ? 'Art' : c.state==='grey' ? 'Grey' : ('Physics'+(c.phyNeeded===false?' — idle':c.phyNeeded===true?' — required':''));
+    const name = c.state==='art' ? ('Art'+(c.val==='love'?' — loved ones':c.val==='passion'?' — passion':'')) : c.state==='grey' ? 'Grey' : ('Physics'+(c.phyNeeded===false?' — idle':c.phyNeeded===true?' — required':''));
     const cls = c.state==='art' ? 'sa' : c.state==='grey' ? 'sg' : 'sp';
     return '<div class="row">'
       + '<span class="t">'+when+'</span>'
@@ -494,7 +559,8 @@ function resetAll(){
 
 /* ---------- init ---------- */
 refreshCtx();
-setInterval(refreshCtx, 60000);
+setInterval(()=>{ refreshCtx(); renderSince(); }, 60000);
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ refreshCtx(); render(); } });
 loadData();
 
 /* ---------- PWA service worker ---------- */
