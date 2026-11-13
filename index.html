@@ -10,7 +10,7 @@
 <link rel="manifest" href="./manifest.json">
 <link rel="icon" type="image/png" href="./icon-192.png">
 <link rel="apple-touch-icon" href="./icon-192.png">
-<title>Two Values</title>
+<title>Dual-Mode Lab</title>
 <style>
   :root{
     --bg:#101216;
@@ -20,555 +20,511 @@
     --text:#e8e5de;
     --muted:#9a968c;
     --faint:#6b675e;
-    --love:#e9a464;
-    --love-soft:rgba(233,164,100,.14);
-    --pas:#62c296;
-    --pas-soft:rgba(98,194,150,.14);
-    --free:#e8e5de;
+    --art:#e9a464;
+    --art-soft:rgba(233,164,100,.14);
+    --phy:#6fb4d8;
+    --phy-soft:rgba(111,180,216,.14);
+    --grey:#8b8f99;
+    --grey-soft:rgba(139,143,153,.14);
     --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,ui-serif,serif;
     --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-  [hidden]{display:none!important}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   body{
     background:var(--bg);color:var(--text);font-family:var(--sans);
     font-size:15px;line-height:1.55;min-height:100vh;
     background-image:
       radial-gradient(700px 340px at -8% -10%, rgba(233,164,100,.07), transparent 60%),
-      radial-gradient(700px 340px at 108% -10%, rgba(98,194,150,.07), transparent 60%);
+      radial-gradient(700px 340px at 108% -10%, rgba(111,180,216,.07), transparent 60%);
     background-attachment:fixed;
     padding-top:env(safe-area-inset-top);
     padding-bottom:env(safe-area-inset-bottom);
   }
   .wrap{max-width:620px;margin:0 auto;padding:26px 16px 60px}
-  button,input{font-family:inherit}
-  button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--muted);outline-offset:1px}
 
   header{margin-bottom:22px}
-  .wordmark{font-family:var(--mono);font-weight:600;font-size:13px;letter-spacing:3px;color:var(--faint);text-transform:uppercase}
-  .vals{margin-top:10px}
-  .vals p{font-family:var(--serif);font-size:21px;line-height:1.3;font-weight:600}
-  .vals .l{color:var(--love)} .vals .p{color:var(--pas)}
-  .vals .f{font-family:var(--sans);font-size:13.5px;font-weight:400;color:var(--muted);margin-top:7px}
-  .axis{height:2px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--love),var(--pas))}
-  #storageBanner{margin-top:12px;padding:9px 13px;border:1px solid #5a4020;background:rgba(233,164,100,.08);border-radius:8px;font-size:13px;color:var(--muted)}
+  .wordmark{display:flex;align-items:baseline;gap:11px;flex-wrap:wrap}
+  .wm-art{font-family:var(--serif);font-style:italic;font-weight:600;font-size:34px;color:var(--art)}
+  .wm-slash{font-size:25px;color:var(--faint);font-weight:200}
+  .wm-phy{font-family:var(--mono);font-weight:600;font-size:27px;letter-spacing:3px;color:var(--phy)}
+  .sub{margin-top:5px;color:var(--muted);font-size:13.5px}
+  .sub b{color:var(--text)}
+  .axis{height:2px;margin-top:14px;border-radius:2px;background:linear-gradient(90deg,var(--art),var(--phy))}
+  #storageBanner{display:none;margin-top:12px;padding:9px 13px;border:1px solid #5a4020;background:rgba(233,164,100,.08);border-radius:8px;font-size:13px;color:var(--muted)}
 
   .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px}
   .card h2{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--faint);font-weight:600;margin-bottom:13px;font-family:var(--mono)}
-  .lbl{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);margin:14px 0 7px}
-  .hint{font-size:12.5px;color:var(--muted)}
 
-  /* ---------- today tiles ---------- */
-  .tiles{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-  .tile{
-    border:1px solid var(--line);background:var(--card2);color:var(--muted);text-align:left;
-    padding:15px 14px;border-radius:12px;cursor:pointer;transition:all .15s ease;min-height:104px;
-    display:flex;flex-direction:column;gap:4px;
+  /* ---------- check-in ---------- */
+  .q{font-size:16px;margin-bottom:13px}
+  .bigrow{display:grid;grid-template-columns:1fr;gap:10px}
+  @media(min-width:480px){.bigrow{grid-template-columns:1fr 1fr 1fr}}
+  .bigbtn{
+    border:1px solid var(--line);background:var(--card2);color:var(--muted);
+    padding:18px 10px;border-radius:12px;cursor:pointer;text-align:center;transition:all .15s ease;
+    min-height:76px;
   }
-  .tile:active{transform:scale(.97)}
-  .tile .n{font-family:var(--serif);font-weight:600;font-size:20px}
-  .tile.love .n{color:var(--love)} .tile.pas .n{color:var(--pas)}
-  .tile .st{font-size:12.5px;line-height:1.4}
-  .tile .plus{margin-top:auto;font-family:var(--mono);font-size:11px;letter-spacing:1px;color:var(--faint)}
-  .tile.love.done{border-color:var(--love);background:var(--love-soft)}
-  .tile.pas.done{border-color:var(--pas);background:var(--pas-soft)}
-  .tile.done .st{color:var(--text)}
-  .verdict{font-size:13px;color:var(--muted);margin-top:12px;min-height:20px;text-align:center}
-  .verdict b{color:var(--text);font-weight:600}
+  .bigbtn .n{display:block;font-size:21px;margin-bottom:3px}
+  .bigbtn .d{display:block;font-size:11px;letter-spacing:.3px}
+  .bigbtn.art .n{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--art)}
+  .bigbtn.phy .n{font-family:var(--mono);letter-spacing:2px;font-weight:600;font-size:17px;color:var(--phy);padding-top:4px}
+  .bigbtn.grey .n{color:var(--grey);font-weight:600;font-size:18px;padding-top:3px}
+  .bigbtn.art:active{border-color:var(--art);background:var(--art-soft)}
+  .bigbtn.phy:active{border-color:var(--phy);background:var(--phy-soft)}
+  .bigbtn.grey:active{border-color:var(--grey);background:var(--grey-soft)}
+  .bigbtn:active{transform:scale(.97)}
+  button:focus-visible,input:focus-visible{outline:2px solid var(--muted);outline-offset:1px}
 
-  /* ---------- log sheet ---------- */
-  #sheet{margin-top:14px;border-top:1px dashed var(--line);padding-top:4px}
-  .sheethead{display:flex;align-items:center;justify-content:space-between;margin-top:10px}
-  .sheethead span{font-family:var(--serif);font-weight:600;font-size:17px}
-  .xbtn{background:none;border:none;color:var(--faint);font-size:22px;padding:2px 10px;cursor:pointer}
-  .chips{display:flex;flex-wrap:wrap;gap:7px}
-  .chip{border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13.5px;padding:7px 14px;border-radius:999px;cursor:pointer;min-height:36px}
-  .chip.on{color:var(--text);background:var(--card2);border-color:var(--muted)}
-  #sheet.love .chip.on{border-color:var(--love);color:var(--love);background:var(--love-soft)}
-  #sheet.pas .chip.on{border-color:var(--pas);color:var(--pas);background:var(--pas-soft)}
-  .chip.add{border-style:dashed;color:var(--faint)}
-  .addrow{display:flex;gap:8px;margin-top:9px}
-  .txt{width:100%;background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:9px;padding:11px 12px;font-size:15px;min-height:44px}
-  .txt::placeholder{color:var(--faint)}
-  .smallbtn{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:9px;padding:0 16px;font-size:13.5px;cursor:pointer;min-height:44px;white-space:nowrap}
-  .freebtn{width:100%;margin-top:12px;border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:9px;padding:11px 12px;font-size:13.5px;cursor:pointer;min-height:44px;text-align:left}
-  .freebtn::before{content:"○  "}
-  .freebtn.on{border-color:var(--free);color:var(--text);background:var(--card2)}
-  .freebtn.on::before{content:"●  "}
-  .qrow{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
-  .qb{border:1px solid var(--line);background:transparent;color:var(--muted);border-radius:7px;font-family:var(--mono);font-size:13px;min-height:38px;cursor:pointer;padding:0}
-  .qb.on{background:var(--text);color:var(--bg);border-color:var(--text);font-weight:600}
-  .savebtn{width:100%;margin-top:16px;border:none;border-radius:10px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;min-height:50px;color:#14161a}
-  #sheet.love .savebtn{background:var(--love)} #sheet.pas .savebtn{background:var(--pas)}
-  .savebtn:active{transform:scale(.98)}
+  #phyFollow{display:none;margin-top:12px}
+  #phyFollow .q{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .halfrow{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .halfbtn{border:1px solid var(--line);background:var(--card2);color:var(--text);padding:14px 8px;border-radius:10px;cursor:pointer;font-size:13.5px;transition:all .15s;min-height:56px}
+  .halfbtn:active{border-color:var(--phy);background:var(--phy-soft);color:var(--phy)}
+  .halfbtn.idle:active{border-color:#d9a080;background:rgba(217,160,128,.1);color:#d9a080}
 
-  /* ---------- next stroke ---------- */
-  .next{display:flex;gap:8px;align-items:stretch;margin-bottom:10px}
-  .next:last-of-type{margin-bottom:0}
-  .next .tag{width:4px;border-radius:3px;flex-shrink:0}
-  .next.love .tag{background:var(--love)} .next.pas .tag{background:var(--pas)}
-  .next .mid{flex:1;min-width:0}
-  .next .why{font-size:12px;color:var(--muted);margin-top:4px}
-  .next.love .smallbtn:active{border-color:var(--love);color:var(--love)}
-  .next.pas .smallbtn:active{border-color:var(--pas);color:var(--pas)}
+  .ctxrow{display:flex;gap:8px;margin-top:14px;align-items:center}
+  .ctxlabel{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-family:var(--mono)}
+  .ctxchip{border:1px solid var(--line);background:transparent;color:var(--muted);font-size:13px;padding:6px 15px;border-radius:999px;cursor:pointer;min-height:34px}
+  .ctxchip.on{border-color:var(--muted);color:var(--text);background:var(--card2)}
+  .savedmsg{font-size:13px;color:var(--muted);margin-top:12px;min-height:18px;text-align:center}
+  .values{margin-top:9px;font-family:var(--serif);font-style:italic;font-size:14px;color:var(--muted)}
+  .values b{font-weight:600;color:var(--art)}
+  .since{font-size:12px;color:var(--faint);font-family:var(--mono);margin:-6px 0 13px}
+  .since.stale{color:#d9a080}
 
-  /* ---------- 14 days ---------- */
+  /* ---------- art → which value ---------- */
+  #artFollow{display:none;margin-top:12px}
+  #artFollow .q{font-size:14px;color:var(--muted);margin-bottom:10px}
+  .triorow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+  .valbtn{border:1px solid var(--line);background:var(--card2);color:var(--text);padding:12px 6px;border-radius:10px;cursor:pointer;font-size:13.5px;min-height:50px}
+  .valbtn:active{border-color:var(--art);background:var(--art-soft);color:var(--art)}
+  .valbtn.skip{color:var(--muted)}
+
+  /* ---------- modes guide ---------- */
+  .mode{border:1px solid var(--line);border-left-width:3px;border-radius:10px;background:var(--card2);margin-bottom:10px}
+  .mode:last-of-type{margin-bottom:0}
+  .mode.art{border-left-color:var(--art)} .mode.phy{border-left-color:var(--phy)} .mode.grey{border-left-color:var(--grey)}
+  .mode summary{list-style:none;cursor:pointer;padding:13px 14px;display:flex;align-items:baseline;gap:10px;min-height:48px}
+  .mode summary::-webkit-details-marker{display:none}
+  .mode summary::after{content:"+";margin-left:auto;color:var(--faint);font-family:var(--mono);font-size:16px}
+  .mode[open] summary::after{content:"–"}
+  .mode summary:focus-visible{outline:2px solid var(--muted);outline-offset:1px;border-radius:9px}
+  .mode .mn{font-size:18px;flex-shrink:0}
+  .mode.art .mn{font-family:var(--serif);font-style:italic;font-weight:600;color:var(--art)}
+  .mode.phy .mn{font-family:var(--mono);letter-spacing:2px;font-weight:600;font-size:15px;color:var(--phy)}
+  .mode.grey .mn{font-weight:600;color:var(--grey)}
+  .mode .mt{font-size:12.5px;color:var(--muted)}
+  .mode .body{padding:0 14px 14px;font-size:14px}
+  .mode .body p{margin-bottom:10px}
+  .mode .lbl{display:block;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);margin-bottom:5px}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .chips span{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:3px 10px}
+  .purpose{border-radius:8px;padding:10px 12px;margin-bottom:10px}
+  .mode.art .purpose{background:var(--art-soft)} .mode.phy .purpose{background:var(--phy-soft)} .mode.grey .purpose{background:var(--grey-soft)}
+  .motto{font-family:var(--serif);font-style:italic;font-size:15.5px;color:var(--text);border-left:2px solid var(--phy);padding:2px 0 2px 12px;margin-bottom:10px}
+  .tapnote{font-size:12.5px;color:var(--muted)}
+  .tapnote b{color:var(--text);font-weight:600}
+
+  /* ---------- today strip ---------- */
+  .strip{display:flex;flex-wrap:wrap;gap:6px;min-height:14px}
+  .dot{width:14px;height:14px;border-radius:50%}
+  .dot.art{background:var(--art)} .dot.phy{background:var(--phy)}
+  .dot.phyidle{background:transparent;border:2px solid var(--phy)}
+  .dot.grey{background:var(--grey)}
+  .stripempty{color:var(--faint);font-size:13px}
+
+  /* ---------- stats ---------- */
   .statgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
   @media(min-width:480px){.statgrid{grid-template-columns:repeat(4,1fr)}}
   .stat{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:12px 13px}
   .stat .k{font-size:10px;letter-spacing:1.3px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);margin-bottom:5px}
   .stat .v{font-family:var(--mono);font-size:23px;font-weight:600;line-height:1.1}
   .stat .d{font-size:11px;color:var(--muted);margin-top:3px}
-  .v.lc{color:var(--love)} .v.pc{color:var(--pas)}
-  .grid{margin-top:18px;display:grid;grid-template-columns:auto repeat(14,1fr);gap:6px 3px;align-items:center}
-  .grid .rl{font-size:9.5px;letter-spacing:1px;text-transform:uppercase;color:var(--faint);font-family:var(--mono);padding-right:6px}
-  .grid .dl{text-align:center;font-size:8.5px;color:var(--faint);font-family:var(--mono)}
-  .grid .dl.today{color:var(--text)}
-  .cell{justify-self:center;width:100%;max-width:18px;aspect-ratio:1;border-radius:50%;border:1.5px solid var(--line)}
-  .cell.love{background:var(--love);border-color:var(--love)}
-  .cell.pas{background:var(--pas);border-color:var(--pas)}
-  .cell.free{background:var(--free);border-color:var(--free);transform:scale(.5)}
-  .cell.nofree{border-color:transparent}
-  .footnote{font-size:11.5px;color:var(--faint);margin-top:12px}
+  .v.artc{color:var(--art)} .v.greyc{color:var(--grey)} .v.warn{color:#d9a080}
 
-  /* ---------- who & what ---------- */
-  .trow{display:flex;align-items:center;gap:10px;padding:5px 0;border-bottom:1px dashed var(--line)}
-  .trow:last-child{border-bottom:none}
-  .trow .go{flex:1;display:flex;align-items:baseline;gap:10px;background:none;border:none;color:var(--text);font-size:14.5px;text-align:left;cursor:pointer;padding:8px 0;min-height:42px}
-  .trow .gap{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted);white-space:nowrap}
-  .trow .gap.cold{color:#d9a080}
-  .trow .gap.warm.love{color:var(--love)} .trow .gap.warm.pas{color:var(--pas)}
-  .del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:17px;padding:4px 10px;border-radius:5px}
-  .del:active{color:#d98080}
-  .empty{color:var(--faint);font-size:13px;padding:6px 0}
+  /* ---------- trend ---------- */
+  .trend{display:flex;gap:4px;align-items:flex-end;height:92px}
+  .tcol{flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;height:100%}
+  .tseg{border-radius:2px;transition:height .4s ease}
+  .tseg.a{background:var(--art)} .tseg.p{background:var(--phy)} .tseg.g{background:#3a3e48}
+  .tlabels{display:flex;gap:4px;margin-top:5px}
+  .tlabels span{flex:1;text-align:center;font-size:8.5px;color:var(--faint);font-family:var(--mono)}
+  .legend{display:flex;gap:14px;margin-top:10px;font-size:12px;color:var(--muted);flex-wrap:wrap}
+  .legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px}
+  .footnote{font-size:11.5px;color:var(--faint);margin-top:10px}
 
-  /* ---------- mirror ---------- */
-  .row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+  /* ---------- log ---------- */
+  .row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13px}
   .row:last-child{border-bottom:none}
-  .row .t{font-family:var(--mono);color:var(--faint);font-size:11.5px;min-width:44px;padding-top:2px}
-  .row .s{flex:1;min-width:0;overflow-wrap:anywhere}
-  .row .who{font-weight:600}
-  .row .who.love{color:var(--love)} .row .who.pas{color:var(--pas)}
-  .row .meta{display:block;font-size:11px;color:var(--faint);font-family:var(--mono);margin-top:2px}
+  .row .t{font-family:var(--mono);color:var(--faint);font-size:12px;min-width:80px}
+  .row .s{flex:1}
+  .s.sa{color:var(--art)} .s.sp{color:var(--phy)} .s.sg{color:var(--grey)}
+  .row .c{font-size:11px;color:var(--faint);font-family:var(--mono)}
+  .row .del{background:none;border:none;color:var(--faint);cursor:pointer;font-size:17px;padding:4px 10px;border-radius:5px}
+  .row .del:active{color:#d98080}
+  .empty{color:var(--faint);font-size:13px;padding:6px 0}
   .toolbar{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}
   .toolbtn{border:1px solid var(--line);background:var(--card2);color:var(--muted);padding:9px 14px;border-radius:8px;font-size:12.5px;cursor:pointer;min-height:38px}
   .toolbtn:active{color:var(--text);border-color:var(--muted)}
   .toolbtn.danger:active{color:#d98080;border-color:#d98080}
-  .toolbtn.on{color:var(--text);border-color:var(--muted)}
-  .flash{font-size:13px;color:var(--muted);margin-top:10px;min-height:18px;text-align:center}
-
-  details.why{font-size:14px}
-  details.why summary{list-style:none;cursor:pointer;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--faint);font-weight:600;font-family:var(--mono);display:flex;min-height:24px;align-items:center}
-  details.why summary::-webkit-details-marker{display:none}
-  details.why summary::after{content:"+";margin-left:auto;font-size:16px}
-  details.why[open] summary::after{content:"–"}
-  details.why p{margin-top:11px;color:var(--muted)}
-  details.why b{color:var(--text);font-weight:600}
 </style>
 </head>
 <body>
 <div class="wrap">
 
   <header>
-    <div class="wordmark">Dec · 22</div>
-    <div class="vals">
-      <p class="l">Do good to the people I love.</p>
-      <p class="p">Devote fully to my passions.</p>
-      <p class="f">And ask no one's permission to live by these two.</p>
+    <div class="wordmark">
+      <span class="wm-art">Art</span><span class="wm-slash">/</span><span class="wm-phy">PHYSICS</span>
     </div>
+    <p class="sub">One tap, whenever you remember: <b>what state was I just in?</b> The check itself is the presence bell.</p>
+    <p class="values">Dec 22: <b>do good to the people I love</b> · <b>devote fully to my passions</b></p>
     <div class="axis" aria-hidden="true"></div>
-    <div id="storageBanner" hidden>This browser is blocking local storage — data will not persist. Check Chrome site settings.</div>
+    <div id="storageBanner">This browser is blocking local storage — data will not persist. Check Chrome site settings.</div>
   </header>
+
+  <!-- ================= CHECK-IN ================= -->
+  <section class="card">
+    <div class="q">What state was I just in?</div>
+    <div class="since" id="since"></div>
+    <div class="bigrow" id="mainBtns">
+      <button type="button" class="bigbtn art" onclick="tap('art')">
+        <span class="n">Art</span><span class="d">present · immersed · ambient awareness</span>
+      </button>
+      <button type="button" class="bigbtn phy" onclick="tap('phy')">
+        <span class="n">PHYSICS</span><span class="d">analytical engine engaged</span>
+      </button>
+      <button type="button" class="bigbtn grey" onclick="tap('grey')">
+        <span class="n">Grey</span><span class="d">drift · rumination · vigilance</span>
+      </button>
+    </div>
+
+    <div id="phyFollow">
+      <div class="q">Was Physics actually required?</div>
+      <div class="halfrow">
+        <button type="button" class="halfbtn" onclick="tapPhy(true)">Required — real problem, real output</button>
+        <button type="button" class="halfbtn idle" onclick="tapPhy(false)">Idle — engine running, nothing to solve</button>
+      </div>
+    </div>
+
+    <div id="artFollow">
+      <div class="q">Which value was alive in it? <span style="color:var(--faint)">(optional)</span></div>
+      <div class="triorow">
+        <button type="button" class="valbtn" onclick="tagArt('love')">Loved ones</button>
+        <button type="button" class="valbtn" onclick="tagArt('passion')">Passion</button>
+        <button type="button" class="valbtn skip" onclick="tagArt(null)">Just present</button>
+      </div>
+    </div>
+
+    <div class="ctxrow">
+      <span class="ctxlabel">Context</span>
+      <button type="button" class="ctxchip" id="ctxWork" onclick="setCtx('work')">Work</button>
+      <button type="button" class="ctxchip" id="ctxOff" onclick="setCtx('off')">Off</button>
+    </div>
+    <div class="savedmsg" id="savedMsg"></div>
+  </section>
+
+  <!-- ================= MODES GUIDE ================= -->
+  <section class="card">
+    <h2>The modes</h2>
+
+    <details class="mode art">
+      <summary><span class="mn">Art</span><span class="mt">full connection</span></summary>
+      <div class="body">
+        <p>A state of complete, embodied presence and genuine connection. I feel my body fully during movement, absorb sensory experiences, connect with my physical environment, and experience unfiltered emotional resonance with the people and things I love. Rather than intellectually analysing life, I fully experience it.</p>
+        <span class="lbl">Typical triggers</span>
+        <div class="chips"><span>Running</span><span>Physical movement</span><span>Snooker flow</span><span>Time with loved ones</span></div>
+        <div class="purpose"><span class="lbl">Purpose</span>To fully experience life and connect deeply with what I love.</div>
+        <p class="tapnote"><b>Tap Art</b> when you were inside the experience, not narrating it.</p>
+      </div>
+    </details>
+
+    <details class="mode phy">
+      <summary><span class="mn">PHYSICS</span><span class="mt">first-principles reasoning</span></summary>
+      <div class="body">
+        <p>A mindset rooted in reducing reality to its fundamental laws, causal mechanisms, and underlying truths. I strip away artificial societal constructs, corporate politics, authority, and imposed rules to examine what actually holds up under scrutiny. I anchor my reasoning in fundamental principles while remaining willing to update my conclusions when better evidence emerges.</p>
+        <p class="motto">“Rhythm is freedom inside form.”</p>
+        <p>Establish the essential constraints and alignment first, then allow natural rhythm to flow.</p>
+        <div class="purpose"><span class="lbl">Purpose</span>To identify and defend what is fundamentally true, independent of authority or social pressure.</div>
+        <p class="tapnote"><b>Required</b> means there was a real problem with a real output, which is the tool doing its job. <b>Idle</b> means the engine was running with nothing to solve.</p>
+      </div>
+    </details>
+
+    <details class="mode grey">
+      <summary><span class="mn">Grey</span><span class="mt">drift · rumination · vigilance</span></summary>
+      <div class="body">
+        <p>Neither experiencing nor reasoning: attention drifting, replaying, or bracing. Grey is the one mode with no purpose to serve, and the aim is to bring it towards zero.</p>
+        <p class="tapnote"><b>Tap Grey</b> without judgement. Grey seen is grey already dissolving, so come back to one sensation.</p>
+      </div>
+    </details>
+  </section>
 
   <!-- ================= TODAY ================= -->
   <section class="card">
     <h2>Today</h2>
-    <div class="tiles">
-      <button type="button" class="tile love" id="tileLove" onclick="openSheet('love')">
-        <span class="n">Love</span><span class="st" id="tileLoveSt"></span><span class="plus">+ LOG A STROKE</span>
-      </button>
-      <button type="button" class="tile pas" id="tilePas" onclick="openSheet('pas')">
-        <span class="n">Passion</span><span class="st" id="tilePasSt"></span><span class="plus">+ LOG A STROKE</span>
-      </button>
-    </div>
-
-    <div id="sheet" hidden>
-      <div class="sheethead"><span id="sheetTitle"></span><button type="button" class="xbtn" onclick="closeSheet()" aria-label="Close">×</button></div>
-      <span class="lbl" id="targetLbl"></span>
-      <div class="chips" id="targetChips"></div>
-      <div class="addrow" id="addRow" hidden>
-        <input class="txt" id="addIn" maxlength="40" autocomplete="off" onkeydown="if(event.key==='Enter')addTarget()">
-        <button type="button" class="smallbtn" onclick="addTarget()">Add</button>
-      </div>
-      <span class="lbl">What did I do? (optional)</span>
-      <input class="txt" id="noteIn" maxlength="200" autocomplete="off" placeholder="One line, in my own words">
-      <button type="button" class="freebtn" id="freeBtn" onclick="toggleFree()">Did it without asking anyone's permission</button>
-      <span class="lbl">Stroke quality (optional) — the movement, not the result</span>
-      <div class="qrow" id="qRow"></div>
-      <button type="button" class="savebtn" onclick="saveStroke()">Log stroke</button>
-    </div>
-
-    <div class="verdict" id="verdict"></div>
+    <div class="strip" id="todayStrip"><span class="stripempty">No checks yet today.</span></div>
   </section>
 
-  <!-- ================= NEXT STROKE ================= -->
-  <section class="card">
-    <h2>Next stroke</h2>
-    <div class="next love">
-      <span class="tag"></span>
-      <div class="mid">
-        <input class="txt" id="intLove" maxlength="200" autocomplete="off" onchange="setIntent('love',this.value)">
-        <div class="why" id="whyLove"></div>
-      </div>
-      <button type="button" class="smallbtn" onclick="doneIntent('love')">Done</button>
-    </div>
-    <div class="next pas">
-      <span class="tag"></span>
-      <div class="mid">
-        <input class="txt" id="intPas" maxlength="200" autocomplete="off" onchange="setIntent('pas',this.value)">
-        <div class="why" id="whyPas"></div>
-      </div>
-      <button type="button" class="smallbtn" onclick="doneIntent('pas')">Done</button>
-    </div>
-    <p class="footnote">Drifting, or stuck in someone else's agenda? Don't analyse it. Play the smallest one of these now.</p>
-  </section>
-
-  <!-- ================= 14 DAYS ================= -->
+  <!-- ================= READOUT ================= -->
   <section class="card">
     <h2>Last 14 days</h2>
     <div class="statgrid">
-      <div class="stat"><div class="k">Both alive</div><div class="v" id="stBoth">–</div><div class="d">days with both values</div></div>
-      <div class="stat"><div class="k">Love</div><div class="v lc" id="stLove">–</div><div class="d" id="stLoveD">strokes</div></div>
-      <div class="stat"><div class="k">Passion</div><div class="v pc" id="stPas">–</div><div class="d" id="stPasD">strokes</div></div>
-      <div class="stat"><div class="k">No permission</div><div class="v" id="stFree">–</div><div class="d">strokes played freely</div></div>
+      <div class="stat"><div class="k">Art rate</div><div class="v artc" id="stArt">–</div><div class="d" id="stArtD">of all checks</div></div>
+      <div class="stat"><div class="k">Grey rate</div><div class="v greyc" id="stGrey">–</div><div class="d">the enemy → 0%</div></div>
+      <div class="stat"><div class="k">Idle physics</div><div class="v warn" id="stIdle">–</div><div class="d">of Physics checks</div></div>
+      <div class="stat"><div class="k">Work-hours art</div><div class="v artc" id="stWorkArt">–</div><div class="d">the new frontier</div></div>
     </div>
-    <div class="grid" id="grid"></div>
-    <p class="footnote">A filled dot means that value was lived that day. The count is the only thing that matters here, not how I felt.</p>
+    <p class="footnote" id="valLine"></p>
+
+    <div style="margin-top:18px">
+      <div class="trend" id="trend"></div>
+      <div class="tlabels" id="tlabels"></div>
+      <div class="legend">
+        <span><i style="background:var(--art)"></i>Art</span>
+        <span><i style="background:var(--phy)"></i>Physics</span>
+        <span><i style="background:#3a3e48"></i>Grey</span>
+      </div>
+      <p class="footnote">Each bar = that day's checks, stacked by share. Default-Art is winning when amber dominates and grey thins toward nothing — Physics is fine, it's the tool.</p>
+    </div>
   </section>
 
-  <!-- ================= WHO & WHAT ================= -->
+  <!-- ================= LOG ================= -->
   <section class="card">
-    <h2>The people I love</h2>
-    <div id="peopleList"></div>
-    <h2 style="margin-top:20px">My passions</h2>
-    <div id="passionList"></div>
-    <p class="footnote">Days since the last stroke, longest gap first. Tap a name to log one. Names stay on this device only.</p>
-  </section>
-
-  <!-- ================= MIRROR ================= -->
-  <section class="card">
-    <h2>Mirror</h2>
-    <div id="logList"></div>
+    <h2>Recent checks</h2>
+    <div id="logList"><div class="empty">Nothing logged yet.</div></div>
     <div class="toolbar">
-      <button class="toolbtn" id="freeFilter" onclick="toggleFilter()">No-permission only</button>
       <button class="toolbtn" onclick="exportJSON()">Export</button>
       <button class="toolbtn" onclick="document.getElementById('importFile').click()">Import</button>
-      <input type="file" id="importFile" accept=".json,application/json" hidden onchange="importJSON(this)">
+      <input type="file" id="importFile" accept=".json,application/json" style="display:none" onchange="importJSON(this)">
       <button class="toolbtn danger" onclick="resetAll()">Reset</button>
     </div>
-    <div class="flash" id="flash"></div>
-  </section>
-
-  <section class="card">
-    <details class="why">
-      <summary>How this works</summary>
-      <p><b>A stroke</b> is one concrete act that serves a value: something good done for someone I love, or time given fully to a passion. Judge the stroke, not the result.</p>
-      <p><b>Love</b> means done from clarity, not from fear of losing, and with nothing expected back.</p>
-      <p><b>Passion</b> means fully devoted while I was there. Snooker is the main vessel; movement quality counts more than the score.</p>
-      <p><b>No permission</b> marks a stroke I played without waiting for anyone's approval.</p>
-      <p>The old Art / Physics / Grey checks are no longer shown, but nothing was deleted. They are still on this device and are included in Export.</p>
-    </details>
   </section>
 
 </div>
 
 <script>
-const KEY = 'twovalues-v1';
-const LEGACY_KEY = 'dualmode-checks-v2';   // old Art/Physics/Grey checks — kept, never modified
-const DAY = 86400000;
-const NAMES = { love:'Love', pas:'Passion' };
+const KEY = 'dualmode-checks-v2';
+let checks = [];
+let ctx = null;            // 'work' | 'off'
+let ctxManual = false;
 
-let db = { strokes:[], people:[], passions:['Snooker','Running'], intent:{love:'', pas:''} };
-let sheet = null;          // { value, target, free, q, fromIntent }
-let freeOnly = false;
-
-/* ---------- storage ---------- */
+/* ---------- storage (localStorage for standalone PWA) ---------- */
 function loadData(){
   try{
     const raw = localStorage.getItem(KEY);
-    if (raw){
-      const d = JSON.parse(raw);
-      db.strokes  = Array.isArray(d.strokes)  ? d.strokes  : [];
-      db.people   = Array.isArray(d.people)   ? d.people   : [];
-      db.passions = Array.isArray(d.passions) ? d.passions : db.passions;
-      db.intent   = Object.assign({love:'', pas:''}, d.intent || {});
-    }
-  }catch(e){ showBanner(); }
+    checks = raw ? JSON.parse(raw) : [];
+  }catch(e){
+    checks = [];
+    showBanner();
+  }
   render();
 }
 function persist(){
-  try{ localStorage.setItem(KEY, JSON.stringify(db)); }catch(e){ showBanner(); }
-}
-function showBanner(){ document.getElementById('storageBanner').hidden = false; }
-
-/* ---------- helpers ---------- */
-const $ = id => document.getElementById(id);
-function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-function dayStart(ts){ const d = new Date(ts); d.setHours(0,0,0,0); return d.getTime(); }
-function daysAgo(ts){ return Math.round((dayStart(Date.now()) - dayStart(ts)) / DAY); }
-function listFor(value){ return value === 'love' ? db.people : db.passions; }
-function lastStroke(value, target){
-  let best = null;
-  for (const s of db.strokes){
-    if (s.value === value && s.target === target && (!best || s.ts > best.ts)) best = s;
+  try{
+    localStorage.setItem(KEY, JSON.stringify(checks));
+  }catch(e){
+    showBanner();
   }
-  return best;
 }
-function gapText(n){ return n === 0 ? 'today' : n === 1 ? 'yesterday' : n + ' days ago'; }
-/* targets ordered longest gap first; never-logged ones lead */
-function ranked(value){
-  return listFor(value).map(name => {
-    const l = lastStroke(value, name);
-    return { name, gap: l ? daysAgo(l.ts) : Infinity };
-  }).sort((a,b) => b.gap - a.gap);
-}
-function flash(t){
-  const el = $('flash');
-  el.textContent = t;
-  setTimeout(()=>{ if (el.textContent === t) el.textContent = ''; }, 3500);
-}
+function showBanner(){ document.getElementById('storageBanner').style.display='block'; }
 
-/* ---------- log sheet ---------- */
-function openSheet(value, opts){
-  opts = opts || {};
-  sheet = { value, target: opts.target || null, free:false, q:null, fromIntent: !!opts.fromIntent };
-  const el = $('sheet');
-  el.className = value;
-  el.hidden = false;
-  $('sheetTitle').textContent = value === 'love' ? 'A stroke for someone I love' : 'A stroke for a passion';
-  $('targetLbl').textContent = value === 'love' ? 'For whom' : 'Which passion';
-  $('addIn').placeholder = value === 'love' ? 'Name' : 'Passion';
-  $('addRow').hidden = true;
-  $('noteIn').value = opts.note || '';
-  paintSheet();
-  el.scrollIntoView({ block:'nearest', behavior:'smooth' });
+/* ---------- context ---------- */
+function autoCtx(){
+  const d = new Date();
+  const wd = d.getDay() >= 1 && d.getDay() <= 5;
+  const h = d.getHours() + d.getMinutes()/60;
+  return (wd && h >= 9 && h < 18.5) ? 'work' : 'off';
 }
-function closeSheet(){ sheet = null; $('sheet').hidden = true; }
-function paintSheet(){
-  if (!sheet) return;
-  const names = listFor(sheet.value);
-  $('targetChips').innerHTML = names.map((n,i) =>
-    '<button type="button" class="chip'+(sheet.target===n?' on':'')+'" onclick="pickTarget('+i+')">'+esc(n)+'</button>'
-  ).join('') + '<button type="button" class="chip add" onclick="showAdd()">+ add</button>';
-  $('freeBtn').classList.toggle('on', sheet.free);
-  $('freeBtn').setAttribute('aria-pressed', sheet.free);
-  let q = '';
-  for (let i=1;i<=10;i++) q += '<button type="button" class="qb'+(sheet.q===i?' on':'')+'" onclick="pickQ('+i+')">'+i+'</button>';
-  $('qRow').innerHTML = q;
+function setCtx(v){ ctx = v; ctxManual = true; paintCtx(); }
+function paintCtx(){
+  document.getElementById('ctxWork').classList.toggle('on', ctx==='work');
+  document.getElementById('ctxOff').classList.toggle('on', ctx==='off');
 }
-function pickTarget(i){
-  const n = listFor(sheet.value)[i];
-  sheet.target = sheet.target === n ? null : n;
-  paintSheet();
-}
-function showAdd(){ $('addRow').hidden = false; $('addIn').value = ''; $('addIn').focus(); }
-function addTarget(){
-  const name = $('addIn').value.trim();
-  if (!name) return;
-  const list = listFor(sheet.value);
-  const existing = list.find(n => n.toLowerCase() === name.toLowerCase());
-  if (!existing) list.push(name);
-  sheet.target = existing || name;
-  $('addRow').hidden = true;
-  persist(); paintSheet(); renderTargets(); renderNext();
-}
-function toggleFree(){ sheet.free = !sheet.free; paintSheet(); }
-function pickQ(i){ sheet.q = sheet.q === i ? null : i; paintSheet(); }
+function refreshCtx(){ if (!ctxManual){ ctx = autoCtx(); paintCtx(); } }
 
-function saveStroke(){
-  if (!sheet) return;
-  const value = sheet.value;
-  db.strokes.push({
-    id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2)),
-    ts: Date.now(),
-    value,
-    target: sheet.target,
-    note: $('noteIn').value.trim(),
-    free: sheet.free,
-    q: sheet.q
-  });
-  if (sheet.fromIntent) db.intent[value] = '';
+/* ---------- tapping ---------- */
+let artTimer = null;
+function hideArtFollow(){ clearTimeout(artTimer); document.getElementById('artFollow').style.display = 'none'; }
+function tap(state){
+  hideArtFollow();
+  if (state === 'phy'){
+    document.getElementById('phyFollow').style.display = 'block';
+    return;
+  }
+  document.getElementById('phyFollow').style.display = 'none';
+  save(state, null);
+  if (state === 'art'){
+    document.getElementById('artFollow').style.display = 'block';
+    artTimer = setTimeout(hideArtFollow, 12000);   // optional: fades away if ignored
+  }
+}
+/* tag the Art check just saved with the Dec-22 value it served */
+function tagArt(v){
+  hideArtFollow();
+  const last = checks[checks.length-1];
+  if (!last || last.state !== 'art') return;
+  last.val = v;
   persist();
-  if (navigator.vibrate) navigator.vibrate(15);
-  closeSheet();
+  if (v) flash(v === 'love' ? 'Logged — Art with someone you love.' : 'Logged — Art inside your passion.');
   render();
 }
-
-/* ---------- next stroke ---------- */
-function suggestion(value){
-  const r = ranked(value);
-  if (!r.length){
-    return value === 'love'
-      ? { target:null, text:'One small good thing, for one person', why:'Add the people I love below and this will point at whoever has waited longest.' }
-      : { target:null, text:'One session, fully there', why:'Add a passion below.' };
-  }
-  const top = r[0];
-  const why = top.gap === Infinity ? 'Nothing logged for ' + top.name + ' yet.'
-            : top.gap === 0 ? 'Every one has a stroke today. Anything more is a bonus.'
-            : 'Longest gap: ' + top.name + ', last stroke ' + gapText(top.gap) + '.';
-  const text = value === 'love' ? 'One small good thing for ' + top.name : top.name + ', fully there';
-  return { target: top.name, text, why };
+function tapPhy(needed){
+  document.getElementById('phyFollow').style.display = 'none';
+  save('phy', needed);
 }
-function setIntent(value, text){ db.intent[value] = text.trim(); persist(); renderNext(); }
-function doneIntent(value){
-  const input = $(value === 'love' ? 'intLove' : 'intPas');
-  const typed = input.value.trim();
-  if (typed !== db.intent[value]){ db.intent[value] = typed; persist(); }
-  const sug = suggestion(value);
-  openSheet(value, { note: typed, target: typed ? null : sug.target, fromIntent: true });
-}
-function renderNext(){
-  [['love','intLove','whyLove'],['pas','intPas','whyPas']].forEach(([value, inId, whyId])=>{
-    const sug = suggestion(value);
-    const input = $(inId);
-    input.placeholder = sug.text;
-    if (document.activeElement !== input) input.value = db.intent[value] || '';
-    $(whyId).textContent = db.intent[value] ? 'My own call. Tap Done once it is played.' : sug.why;
+function save(state, phyNeeded){
+  checks.push({
+    id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())+Math.random().toString(16).slice(2)),
+    ts: Date.now(),
+    state,
+    phyNeeded,
+    ctx
   });
+  persist();
+  const msgs = {
+    art: 'Logged. Stay with it.',
+    phy: phyNeeded ? 'Logged — clean tool use.' : 'Logged — idle engine noticed. Way back: one small thing for someone you love, or your passion.',
+    grey: 'Logged. Grey seen is grey already dissolving — come back to one sensation, or one small good thing for someone you love.'
+  };
+  flash(msgs[state]);
+  if (navigator.vibrate) navigator.vibrate(15);
+  ctxManual = false; refreshCtx();
+  render();
 }
+function flash(t){
+  const el = document.getElementById('savedMsg');
+  el.textContent = t;
+  setTimeout(()=>{ if (el.textContent===t) el.textContent=''; }, 5000);
+}
+
+/* ---------- helpers ---------- */
+function dayKey(ts){
+  const d = new Date(ts);
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function pct(n, d){ return d ? Math.round(100*n/d)+'%' : '–'; }
 
 /* ---------- render ---------- */
-function render(){ renderToday(); renderNext(); renderStats(); renderTargets(); renderLog(); }
+function render(){ renderSince(); renderToday(); renderStats(); renderTrend(); renderLog(); }
+
+/* how long since the last bell — makes the gap visible the moment the app opens */
+function renderSince(){
+  const el = document.getElementById('since');
+  const tk = dayKey(Date.now());
+  const today = checks.filter(c => dayKey(c.ts) === tk).length;
+  if (!checks.length){ el.textContent = 'No checks yet.'; el.classList.remove('stale'); return; }
+  const last = checks.reduce((m,c)=>Math.max(m,c.ts),0);
+  const mins = Math.floor((Date.now()-last)/60000);
+  const ago = mins < 1 ? 'just now'
+            : mins < 60 ? mins+'m ago'
+            : mins < 1440 ? Math.floor(mins/60)+'h '+(mins%60)+'m ago'
+            : Math.floor(mins/1440)+(mins < 2880 ? ' day' : ' days')+' ago';
+  el.textContent = 'Last check '+ago+' · '+today+' today';
+  el.classList.toggle('stale', mins >= 180);
+}
 
 function renderToday(){
-  const t0 = dayStart(Date.now());
-  const today = db.strokes.filter(s => s.ts >= t0);
-  const done = {};
-  [['love','tileLove','tileLoveSt'],['pas','tilePas','tilePasSt']].forEach(([value, tileId, stId])=>{
-    const mine = today.filter(s => s.value === value);
-    done[value] = mine.length > 0;
-    $(tileId).classList.toggle('done', done[value]);
-    if (!mine.length){
-      $(stId).textContent = 'Nothing yet today.';
-    } else {
-      const last = mine[mine.length-1];
-      const what = last.target || last.note || '';
-      $(stId).textContent = mine.length + (mine.length === 1 ? ' stroke' : ' strokes') + (what ? ' · ' + what : '');
-    }
-  });
-  const v = $('verdict');
-  if (done.love && done.pas) v.innerHTML = '<b>Both values lived today.</b>';
-  else if (done.love) v.textContent = 'Love is alive today. Passion is still open.';
-  else if (done.pas) v.textContent = 'Passion is alive today. Love is still open.';
-  else v.textContent = 'Two strokes make a full day: one for each value.';
+  const box = document.getElementById('todayStrip');
+  const tk = dayKey(Date.now());
+  const today = checks.filter(c => dayKey(c.ts) === tk);
+  if (!today.length){ box.innerHTML = '<span class="stripempty">No checks yet today.</span>'; return; }
+  box.innerHTML = today.map(c=>{
+    const cls = c.state==='art' ? 'art' : c.state==='grey' ? 'grey' : (c.phyNeeded===false ? 'phyidle' : 'phy');
+    const d = new Date(c.ts);
+    const t = String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const name = c.state==='art' ? 'Art' : c.state==='grey' ? 'Grey' : (c.phyNeeded===false ? 'Physics (idle)' : 'Physics');
+    return '<span class="dot '+cls+'" title="'+t+' · '+name+'"></span>';
+  }).join('');
 }
 
 function renderStats(){
-  const t0 = dayStart(Date.now());
+  const cutoff = Date.now() - 14*86400000;
+  const r = checks.filter(c=>c.ts >= cutoff);
+  const art = r.filter(c=>c.state==='art').length;
+  const grey = r.filter(c=>c.state==='grey').length;
+  const phy = r.filter(c=>c.state==='phy');
+  const idle = phy.filter(c=>c.phyNeeded===false).length;
+  const work = r.filter(c=>c.ctx==='work');
+  const workArt = work.filter(c=>c.state==='art').length;
+
+  document.getElementById('stArt').textContent = pct(art, r.length);
+  document.getElementById('stArtD').textContent = r.length + ' checks';
+  document.getElementById('stGrey').textContent = pct(grey, r.length);
+  document.getElementById('stIdle').textContent = pct(idle, phy.length);
+  document.getElementById('stWorkArt').textContent = pct(workArt, work.length);
+
+  const artChecks = r.filter(c=>c.state==='art');
+  const love = artChecks.filter(c=>c.val==='love').length;
+  const pas = artChecks.filter(c=>c.val==='passion').length;
+  document.getElementById('valLine').textContent = artChecks.length
+    ? 'Of '+artChecks.length+' Art checks: '+love+' with loved ones · '+pas+' in a passion.'
+    : '';
+}
+
+function renderTrend(){
+  const trend = document.getElementById('trend');
+  const labels = document.getElementById('tlabels');
+  trend.innerHTML = ''; labels.innerHTML = '';
   const days = [];
   for (let i=13;i>=0;i--){
-    const d = new Date(t0); d.setDate(d.getDate() - i);
-    days.push({ start:d.getTime(), label:d.getDate(), love:0, pas:0, free:0 });
+    const d = new Date(Date.now() - i*86400000);
+    days.push({ key: dayKey(d.getTime()), label: String(d.getDate()), a:0, p:0, g:0 });
   }
-  const first = days[0].start;
-  db.strokes.forEach(s=>{
-    if (s.ts < first) return;
-    const ds = dayStart(s.ts);
-    const d = days.find(x => x.start === ds);
-    if (!d) return;
-    d[s.value === 'love' ? 'love' : 'pas']++;
-    if (s.free) d.free++;
+  const map = Object.fromEntries(days.map(d=>[d.key,d]));
+  checks.forEach(c=>{
+    const k = dayKey(c.ts);
+    if (!map[k]) return;
+    if (c.state==='art') map[k].a++;
+    else if (c.state==='phy') map[k].p++;
+    else map[k].g++;
   });
-  const sum = k => days.reduce((a,d)=>a+d[k],0);
-  $('stBoth').textContent = days.filter(d=>d.love && d.pas).length + '/14';
-  $('stLove').textContent = sum('love');
-  $('stLoveD').textContent = 'strokes · ' + days.filter(d=>d.love).length + ' days';
-  $('stPas').textContent = sum('pas');
-  $('stPasD').textContent = 'strokes · ' + days.filter(d=>d.pas).length + ' days';
-  $('stFree').textContent = sum('free');
-
-  let h = '<span class="rl">Love</span>' + days.map(d=>'<span class="cell'+(d.love?' love':'')+'" title="'+d.love+'"></span>').join('');
-  h += '<span class="rl">Passion</span>' + days.map(d=>'<span class="cell'+(d.pas?' pas':'')+'" title="'+d.pas+'"></span>').join('');
-  h += '<span class="rl">Free</span>' + days.map(d=>'<span class="cell '+(d.free?'free':'nofree')+'" title="'+d.free+'"></span>').join('');
-  h += '<span></span>' + days.map((d,i)=>'<span class="dl'+(i===13?' today':'')+'">'+d.label+'</span>').join('');
-  $('grid').innerHTML = h;
-}
-
-function renderTargets(){
-  [['love','peopleList','No one added yet. Tap Love above and add the first name.'],
-   ['pas','passionList','No passions listed. Tap Passion above to add one.']].forEach(([value, boxId, emptyMsg])=>{
-    const r = ranked(value);
-    const list = listFor(value);
-    $(boxId).innerHTML = r.length ? r.map(t=>{
-      const i = list.indexOf(t.name);
-      const cls = t.gap === Infinity || t.gap >= 7 ? 'cold' : t.gap <= 1 ? 'warm '+value : '';
-      const gap = t.gap === Infinity ? 'not yet' : gapText(t.gap);
-      return '<div class="trow">'
-        + '<button type="button" class="go" onclick="logFor(\''+value+'\','+i+')"><span>'+esc(t.name)+'</span><span class="gap '+cls+'">'+gap+'</span></button>'
-        + '<button type="button" class="del" title="Remove" onclick="removeTarget(\''+value+'\','+i+')">×</button>'
-        + '</div>';
-    }).join('') : '<div class="empty">'+emptyMsg+'</div>';
+  days.forEach(d=>{
+    const tot = d.a + d.p + d.g;
+    const col = document.createElement('div');
+    col.className = 'tcol';
+    col.title = tot ? ('Art '+d.a+' · Physics '+d.p+' · Grey '+d.g) : 'no checks';
+    if (tot){
+      const mk = (cls, n)=>{ const s=document.createElement('div'); s.className='tseg '+cls; s.style.height=(100*n/tot)+'%'; return s; };
+      if (d.g) col.appendChild(mk('g', d.g));
+      if (d.p) col.appendChild(mk('p', d.p));
+      if (d.a) col.appendChild(mk('a', d.a));  // art at the base
+    }
+    trend.appendChild(col);
+    const lb = document.createElement('span'); lb.textContent = d.label; labels.appendChild(lb);
   });
-}
-function logFor(value, i){ openSheet(value, { target: listFor(value)[i] }); }
-function removeTarget(value, i){
-  const list = listFor(value);
-  if (!confirm('Remove "'+list[i]+'" from the list? Logged strokes stay in the mirror.')) return;
-  list.splice(i,1);
-  persist(); render(); paintSheet();
 }
 
 function renderLog(){
-  const box = $('logList');
-  let rows = [...db.strokes].sort((a,b)=>b.ts-a.ts);
-  if (freeOnly) rows = rows.filter(s=>s.free);
-  $('freeFilter').classList.toggle('on', freeOnly);
-  if (!rows.length){
-    box.innerHTML = '<div class="empty">'+(freeOnly ? 'No strokes marked no-permission yet.' : 'Nothing logged yet. This fills up with evidence of the two values, in my own words.')+'</div>';
-    return;
-  }
-  box.innerHTML = rows.slice(0,60).map(s=>{
-    const d = new Date(s.ts);
-    const when = (d.getMonth()+1)+'/'+d.getDate();
-    const who = s.target || NAMES[s.value];
-    const meta = [NAMES[s.value], s.free ? 'no permission' : '', s.q ? 'stroke '+s.q+'/10' : ''].filter(Boolean).join(' · ');
+  const box = document.getElementById('logList');
+  if (!checks.length){ box.innerHTML = '<div class="empty">Nothing logged yet.</div>'; return; }
+  const rows = [...checks].sort((a,b)=>b.ts-a.ts).slice(0,30);
+  box.innerHTML = rows.map(c=>{
+    const d = new Date(c.ts);
+    const when = (d.getMonth()+1)+'/'+d.getDate()+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    const name = c.state==='art' ? ('Art'+(c.val==='love'?' — loved ones':c.val==='passion'?' — passion':'')) : c.state==='grey' ? 'Grey' : ('Physics'+(c.phyNeeded===false?' — idle':c.phyNeeded===true?' — required':''));
+    const cls = c.state==='art' ? 'sa' : c.state==='grey' ? 'sg' : 'sp';
     return '<div class="row">'
       + '<span class="t">'+when+'</span>'
-      + '<span class="s"><span class="who '+s.value+'">'+esc(who)+'</span>'+(s.note ? ' — '+esc(s.note) : '')
-      + '<span class="meta">'+meta+'</span></span>'
-      + '<button class="del" title="Delete" onclick="delStroke(\''+esc(s.id)+'\')">×</button>'
+      + '<span class="s '+cls+'">'+name+'</span>'
+      + '<span class="c">'+(c.ctx||'')+'</span>'
+      + '<button class="del" title="Delete" onclick="delCheck(\''+c.id+'\')">×</button>'
       + '</div>';
   }).join('');
 }
-function toggleFilter(){ freeOnly = !freeOnly; renderLog(); }
-function delStroke(id){
-  db.strokes = db.strokes.filter(s=>s.id!==id);
-  persist(); render();
-}
 
-/* ---------- export / import ---------- */
-function legacyChecks(){
-  try{ const raw = localStorage.getItem(LEGACY_KEY); const a = raw ? JSON.parse(raw) : []; return Array.isArray(a) ? a : []; }
-  catch(e){ return []; }
+function delCheck(id){
+  checks = checks.filter(c=>c.id!==id);
+  persist();
+  render();
 }
 function exportJSON(){
-  const out = { app:'two-values', version:1, exportedAt:new Date().toISOString(), data:db, legacyChecks:legacyChecks() };
-  const blob = new Blob([JSON.stringify(out, null, 2)], {type:'application/json'});
+  const blob = new Blob([JSON.stringify(checks, null, 2)], {type:'application/json'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = 'two-values-' + new Date().toISOString().slice(0,10) + '.json';
+  a.download = 'dual-mode-checks.json';
   a.click();
   URL.revokeObjectURL(a.href);
-}
-function mergeLegacy(arr){
-  const cur = legacyChecks();
-  const have = new Set(cur.map(c=>c.id));
-  let added = 0;
-  arr.forEach(c=>{ if (c && c.id && c.ts && c.state && !have.has(c.id)){ cur.push(c); have.add(c.id); added++; } });
-  if (added){ cur.sort((a,b)=>a.ts-b.ts); localStorage.setItem(LEGACY_KEY, JSON.stringify(cur)); }
-  return added;
 }
 function importJSON(input){
   const file = input.files && input.files[0];
@@ -577,26 +533,16 @@ function importJSON(input){
   reader.onload = ()=>{
     try{
       const data = JSON.parse(reader.result);
-      if (Array.isArray(data)){                       // an export from the old Art/Physics app
-        flash('Kept ' + mergeLegacy(data) + ' old mode checks in storage (not shown).');
-      } else if (data && data.data && Array.isArray(data.data.strokes)){
-        const have = new Set(db.strokes.map(s=>s.id));
-        let added = 0;
-        data.data.strokes.forEach(s=>{
-          if (s && s.id && s.ts && (s.value==='love' || s.value==='pas') && !have.has(s.id)){ db.strokes.push(s); have.add(s.id); added++; }
-        });
-        db.strokes.sort((a,b)=>a.ts-b.ts);
-        [['people', data.data.people], ['passions', data.data.passions]].forEach(([k, src])=>{
-          (Array.isArray(src) ? src : []).forEach(n=>{
-            if (typeof n === 'string' && n.trim() && !db[k].some(x=>x.toLowerCase()===n.trim().toLowerCase())) db[k].push(n.trim());
-          });
-        });
-        if (Array.isArray(data.legacyChecks)) mergeLegacy(data.legacyChecks);
-        persist(); render();
-        flash('Imported ' + added + ' strokes.');
-      } else {
-        throw new Error('unrecognised');
-      }
+      if (!Array.isArray(data)) throw new Error('not an array');
+      const existing = new Set(checks.map(c=>c.id));
+      let added = 0;
+      data.forEach(c=>{
+        if (c && c.id && c.ts && c.state && !existing.has(c.id)){ checks.push(c); added++; }
+      });
+      checks.sort((a,b)=>a.ts-b.ts);
+      persist();
+      render();
+      flash('Imported '+added+' checks.');
     }catch(e){
       flash('Import failed — file is not a valid export.');
     }
@@ -605,18 +551,17 @@ function importJSON(input){
   reader.readAsText(file);
 }
 function resetAll(){
-  if (!confirm('Delete every stroke, name and old mode check on this device? Export first if you want the data.')) return;
-  db = { strokes:[], people:[], passions:['Snooker','Running'], intent:{love:'', pas:''} };
-  try{ localStorage.removeItem(KEY); localStorage.removeItem(LEGACY_KEY); }catch(e){}
-  closeSheet(); render();
+  if (!confirm('Delete all checks? Export first if you want the data.')) return;
+  checks = [];
+  try{ localStorage.removeItem(KEY); }catch(e){}
+  render();
 }
 
 /* ---------- init ---------- */
+refreshCtx();
+setInterval(()=>{ refreshCtx(); renderSince(); }, 60000);
+document.addEventListener('visibilitychange', ()=>{ if (!document.hidden){ refreshCtx(); render(); } });
 loadData();
-/* roll the day over if the app stays open past midnight */
-let shownDay = dayStart(Date.now());
-setInterval(()=>{ const d = dayStart(Date.now()); if (d !== shownDay){ shownDay = d; render(); } }, 60000);
-document.addEventListener('visibilitychange', ()=>{ if (!document.hidden) render(); });
 
 /* ---------- PWA service worker ---------- */
 if ('serviceWorker' in navigator){
