@@ -1,5 +1,5 @@
-/* Dual-Mode Lab service worker — bump CACHE name whenever you update index.html */
-const CACHE = 'dml-v2';
+/* Two Values service worker — bump CACHE name whenever you update index.html */
+const CACHE = 'dml-v3';
 const ASSETS = [
   './',
   './index.html',
